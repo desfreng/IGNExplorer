@@ -1,0 +1,58 @@
+<resources>
+    <string name="app_name">IGNExplorer</string>
+    <string name="MAP_FILE">tiles.json</string>
+
+    <string name="snack_msg">The application is currently parsing data. Are you sure to stop the process and quit ?</string>
+    <string name="yes">yes</string>
+    <string name="no">no</string>
+
+    <string name="button_open">Open Archive</string>
+    <string name="pick_file">Pick an archive to extract.</string>
+
+    <string name="begin_process">*** Begin of Extraction Logs ***</string>
+    <string name="copying_archive">Coping archive to application cache.</string>
+    <string name="copied_archive">Copied archive to application cache.</string>
+    <string name="scanning_archive">Scanning archive for file to extract.</string>
+    <plurals name="extracting_archive">
+        <item quantity="one">Started extraction of %d file.</item>
+        <item quantity="other">Started extraction of %d files.</item>
+    </plurals>
+    <string name="processing_file">Thread %d: Started conversion of %s.</string>
+    <string name="extracted_file">Thread %d: File %s done.</string>
+
+    <plurals name="extracted_archive">
+        <item quantity="one">Extracted %d file from archive.</item>
+        <item quantity="other">Extracted %d files from archive.</item>
+    </plurals>
+
+    <string name="saving_model">Saving model.</string>
+    <string name="cleaning_cache">Cleaning application cache.</string>
+    <string name="cleaned_cache">Cache cleared !</string>
+    <string name="end_process">No error !\n*** Process done ***</string>
+    <string name="end_process_error">Process ended with errors !\n*** Process ended ***</string>
+
+    <string name="warn_geometry">Thread %d: Wrong Geometry of %s, file ignored.</string>
+    <string name="warn_calibration">Thread %d: Unable to calibrate %s, file ignored.</string>
+
+    <string name="error_copy">Error while copying archive:\n%s</string>
+    <string name="error_extraction">Error while extracting archive:\n%s</string>
+    <string name="error_saving">Error while saving:\n%s</string>
+    <string name="error_cache">Error during cache cleaning.</string>
+
+    <string name="main_copy">Copying archive</string>
+    <string name="main_scan">Scanning for files</string>
+    <string name="main_extraction">Extracting</string>
+    <string name="main_save">Saving</string>
+    <string name="main_clean">Cleaning</string>
+    <string name="main_done">Done</string>
+    <string name="main_done_error">Done with errors</string>
+
+    <string name="main_error">Error</string>
+
+
+    <string name="title_main_activity">Main Activity</string>
+    <string name="open_archive">Open Archive</string>
+    <string name="search_place">Search for a Place</string>
+    <string name="place_history">Place History</string>
+    <string name="no_files">You don\'t have any maps installed.</string>
+</resources>

@@ -1,0 +1,6 @@
+[submodule "app/src/main/cpp/GeoTiffUtils"]
+	path = app/src/main/cpp/GeoTiffUtils
+	url = https://github.com/desfreng/GeoTiffUtils.git
+[submodule "app/src/main/cpp/7zExtract"]
+	path = app/src/main/cpp/7zExtract
+	url = https://github.com/desfreng/7zExtract.git
