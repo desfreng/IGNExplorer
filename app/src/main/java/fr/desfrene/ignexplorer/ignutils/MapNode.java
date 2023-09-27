@@ -14,8 +14,12 @@ import com.google.gson.JsonSerializer;
 import java.util.HashMap;
 
 public final class MapNode {
+
+    public static class IncompatibleGeometry extends Exception {
+    }
+
     final TileGeometry geometry;
-    final HashMap<PointF, MapTile> tiles = new HashMap<>();
+    public final HashMap<PointF, MapTile> tiles = new HashMap<>();
 
     private MapNode(@NonNull TileGeometry geo) {
         this.geometry = geo;
@@ -25,13 +29,13 @@ public final class MapNode {
         return geometry;
     }
 
-    private void addChild(MapTile area, @NonNull final TileGeometry geo) {
+    private void addChild(MapTile area, @NonNull final TileGeometry geo) throws IncompatibleGeometry {
         if (!geometry.isCompatibleWith(geo)) {
-            throw new RuntimeException("Incompatible Geometries!");
+            throw new IncompatibleGeometry();
         }
 
         PointF c = new PointF();
-        geometry.normalizeCoord(area.getTopLeftCoordinates(), c);
+        geometry.normalizeCoord(area.getTopLeftCoordinates().getPointF(), c);
 
         if (!tiles.containsKey(c)) {
             tiles.put(c, area);
@@ -40,7 +44,7 @@ public final class MapNode {
 
     @NonNull
     public static MapNode addTile(@Nullable MapNode root, @NonNull final MapTile tile,
-                                  @NonNull final TileGeometry geo) {
+                                  @NonNull final TileGeometry geo) throws IncompatibleGeometry {
         if (root == null) {
             root = new MapNode(geo);
         }
@@ -85,7 +89,11 @@ public final class MapNode {
 
                 for (JsonElement elm : arr) {
                     MapTile tile = context.deserialize(elm, MapTile.class);
-                    node = MapNode.addTile(node, tile, geo);
+                    try {
+                        node = MapNode.addTile(node, tile, geo);
+                    } catch (IncompatibleGeometry e) {
+                        throw new RuntimeException(e);
+                    }
                 }
 
                 return node;

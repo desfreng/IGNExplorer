@@ -3,17 +3,14 @@
 
     <item
             android:id="@+id/open_archive"
-            android:title="@string/open_archive"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:title="@string/open_archive" />
     <item
             android:id="@+id/search_place"
-            android:title="@string/search_place"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:title="@string/search_place" />
     <item
             android:id="@+id/place_history"
-            android:title="@string/place_history"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:title="@string/place_history" />
+    <item
+            android:id="@+id/reset"
+            android:title="@string/reset_app" />
 </menu>

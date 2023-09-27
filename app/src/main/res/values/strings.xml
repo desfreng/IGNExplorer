@@ -36,12 +36,13 @@
 
     <string name="error_copy">Error while copying archive:\n%s</string>
     <string name="error_extraction">Error while extracting archive:\n%s</string>
+    <string name="error_incompatible">Extracted maps are incompatible with existing ones.</string>
     <string name="error_saving">Error while saving:\n%s</string>
     <string name="error_cache">Error during cache cleaning.</string>
-
+    
     <string name="main_copy">Copying archive</string>
     <string name="main_scan">Scanning for files</string>
-    <string name="main_extraction">Extracting</string>
+    <string name="main_extraction">Extracting (%d/%d)</string>
     <string name="main_save">Saving</string>
     <string name="main_clean">Cleaning</string>
     <string name="main_done">Done</string>
@@ -55,4 +56,6 @@
     <string name="search_place">Search for a Place</string>
     <string name="place_history">Place History</string>
     <string name="no_files">You don\'t have any maps installed.</string>
+    <string name="reset_app">Reset App Data (Caution)</string>
+
 </resources>

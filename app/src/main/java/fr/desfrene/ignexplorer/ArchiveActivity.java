@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.method.ScrollingMovementMethod;
@@ -15,7 +14,6 @@ import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -140,24 +138,15 @@ public class ArchiveActivity extends AppCompatActivity {
         appendText(getString(textId));
     }
 
-    @NonNull
-    private File getImageDir() {
-        File f = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-
-        if (f != null) {
-            return f;
-        }
-
-        return getFilesDir();
-    }
-
     private void parseArchive(Uri uri) {
         Handler handler = new Handler(Looper.getMainLooper());
 
         final File cacheArchiveFile = new File(getCacheDir(), "archive.7z");
-        final File imageDir = getImageDir();
+        final File imageDir = MainActivity.getImageDir(this);
         ProgressStatus status = new ProgressStatus() {
             boolean goneSmoothly;
+            int fileFound;
+            int fileDone;
 
             @Override
             public void begin() {
@@ -197,12 +186,14 @@ public class ArchiveActivity extends AppCompatActivity {
                     progressBar.setIndeterminate(false);
                     progressBar.setMin(0);
                     progressBar.setMax(fileFound + 1);
+                    this.fileFound = fileFound;
+                    this.fileDone = 0;
                     progressBar.setProgress(1);
 
                     appendText(getResources().getQuantityString(R.plurals.extracting_archive,
                             fileFound, fileFound));
 
-                    mainStatus.setText(R.string.main_extraction);
+                    mainStatus.setText(getString(R.string.main_extraction, fileDone, fileFound));
                 });
             }
 
@@ -219,6 +210,8 @@ public class ArchiveActivity extends AppCompatActivity {
                 handler.post(() -> {
                     appendText(getString(R.string.extracted_file, threadId, fileNameStr));
                     progressBar.incrementProgressBy(1);
+                    fileDone++;
+                    mainStatus.setText(getString(R.string.main_extraction, fileDone, fileFound));
                 });
             }
 
@@ -345,6 +338,24 @@ public class ArchiveActivity extends AppCompatActivity {
                     button.setEnabled(true);
                 });
             }
+
+            @Override
+            public void incompatibleTileSet() {
+                handler.post(() -> {
+                    progressBar.setVisibility(View.INVISIBLE);
+                    progressBar.setIndeterminate(false);
+                    progressBar.setMin(0);
+                    progressBar.setMax(1);
+                    progressBar.setProgress(0);
+
+                    appendText(getString(R.string.error_incompatible));
+
+                    mainStatus.setKeepScreenOn(false);
+                    mainStatus.setText(R.string.main_error);
+
+                    button.setEnabled(true);
+                });
+            }
         };
 
 
@@ -377,6 +388,9 @@ public class ArchiveActivity extends AppCompatActivity {
                         imageDir.getPath(), status);
             } catch (ArchiveParser.NativeException e) {
                 status.extractionError(e);
+                return;
+            } catch (MapNode.IncompatibleGeometry e) {
+                status.incompatibleTileSet();
                 return;
             }
 

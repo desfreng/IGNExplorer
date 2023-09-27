@@ -3,8 +3,10 @@ package fr.desfrene.ignexplorer;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -15,17 +17,20 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import fr.desfrene.ignexplorer.ignutils.LambertCoordinates;
 import fr.desfrene.ignexplorer.ignutils.MapNode;
-import fr.desfrene.ignexplorer.ignutils.MapNodeSaver;
+import fr.desfrene.ignexplorer.ignutils.MapSaver;
 import fr.desfrene.ignexplorer.viewutils.MapView;
 
 public class MainActivity extends AppCompatActivity {
     private MapView mapView;
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,9 +39,20 @@ public class MainActivity extends AppCompatActivity {
         Toolbar myToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
         mapView = findViewById(R.id.mapView);
+        Log.e("MEMORY", "Max Memory : " + Runtime.getRuntime().maxMemory() + " o");
 
-        Handler handler = new Handler(Looper.getMainLooper());
+        mapView.setScale(1f);
+        mapView.setCenterCoordinates(LambertCoordinates.fromLatLonDeg(49.271325, -0.198304));
+    }
 
+
+    @Override
+    protected void onStart() {
+        refreshRoot();
+        super.onStart();
+    }
+
+    private void refreshRoot() {
         new Thread(() -> {
             MapNode root = openTiles(this);
 
@@ -48,14 +64,10 @@ public class MainActivity extends AppCompatActivity {
                     mySnackbar.setAction(R.string.open_archive, v -> openArchives());
                     mySnackbar.show();
                 });
+            } else {
+                mapView.setRoot(root);
             }
-
-            mapView.setRoot(root);
         }).start();
-
-        mapView.setScale(.1f);
-        mapView.setCenterCoordinates(LambertCoordinates.fromLatLonDeg(6.576383, 44.391970));
-
     }
 
     @Override
@@ -63,6 +75,17 @@ public class MainActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
         return true;
+    }
+
+    @NonNull
+    static public File getImageDir(Context c) {
+        File f = c.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+        if (f != null) {
+            return f;
+        }
+
+        return c.getFilesDir();
     }
 
 
@@ -75,6 +98,15 @@ public class MainActivity extends AppCompatActivity {
             return true;
         } else if (item.getItemId() == R.id.search_place) {
             return true;
+        } else if (item.getItemId() == R.id.reset) {
+            try {
+                FileUtils.forceDelete(mapFile(this));
+                FileUtils.deleteDirectory(getImageDir(this));
+            } catch (IOException e) {
+                throw new IllegalStateException("Unable to Remove File Data", e);
+            }
+            refreshRoot();
+            return true;
         } else {
             return super.onOptionsItemSelected(item);
         }
@@ -86,14 +118,14 @@ public class MainActivity extends AppCompatActivity {
 
     public static MapNode openTiles(Context c) {
         try {
-            return MapNodeSaver.getMap(mapFile(c));
+            return MapSaver.getMap(mapFile(c));
         } catch (FileNotFoundException ignored) {
             return null;
         }
     }
 
     public static void saveTiles(MapNode n, Context c) throws IOException {
-        MapNodeSaver.saveMap(n, mapFile(c));
+        MapSaver.saveMap(n, mapFile(c));
     }
 
     private void openArchives() {

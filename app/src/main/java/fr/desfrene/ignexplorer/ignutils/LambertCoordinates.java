@@ -10,14 +10,11 @@ import static java.lang.Math.pow;
 import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
 import static java.lang.Math.tan;
-import static java.lang.Math.toDegrees;
 import static java.lang.Math.toRadians;
 
 import android.graphics.PointF;
 
 import androidx.annotation.NonNull;
-
-import java.util.Objects;
 
 public class LambertCoordinates {
     private static final float LAMBERT_E = 0.081819191f;
@@ -26,63 +23,32 @@ public class LambertCoordinates {
     private static final float LAMBERT_C = 11754255.426f;
     private static final float LAMBERT_XS = 700000;
     private static final float LAMBERT_YS = 12655612.0499f;
+    private final PointF c = new PointF();
+//    private final transient PointF latLon = new PointF(); // x ~ latitude | y ~ longitude
 
-    private final float lambertX;
-    private final float lambertY;
-    private transient double[] lonLat;
-
-    private LambertCoordinates(float x, float y) {
+    private LambertCoordinates(final @NonNull PointF p) {
         // x, y in Lambert93
-        lambertX = x;
-        lambertY = y;
+        c.set(p);
+//        latLon.set(latLonFromLambert(c));
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        LambertCoordinates that = (LambertCoordinates) o;
-        return Double.compare(lambertX, that.lambertX) == 0 && Double.compare(lambertY,
-                that.lambertY) == 0;
+    public static LambertCoordinates fromLatLonRad(double lat, double lon) {
+        return new LambertCoordinates(lambertFromLatLon(lat, lon));
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(lambertX, lambertY);
+    public static LambertCoordinates fromLatLonDeg(double lat, double lon) {
+        return fromLatLonRad(toRadians(lat), toRadians(lon));
     }
 
-    @NonNull
-    @Override
-    public String toString() {
-        return String.format("LambertCoordinates{%s, %s}", getLambertX(), getLambertY());
+    public static LambertCoordinates fromLambert(float x, float y) {
+        return new LambertCoordinates(new PointF(x, y));
     }
 
-    public static LambertCoordinates fromLatLonRad(double lon, double lat) {
-        float[] lambert = lambertFromLatLon(lon, lat);
-
-        return fromLambert(lambert[0], lambert[1]);
+    final public PointF getPointF() {
+        return c;
     }
 
-    public static LambertCoordinates fromLatLonDeg(double lon, double lat) {
-        return fromLatLonRad(toRadians(lon), toRadians(lat));
-    }
-
-    public static LambertCoordinates fromLambert(double x, double y) {
-        return new LambertCoordinates((float) x, (float) y);
-    }
-
-    public LambertCoordinates translate(float dx, float dy) {
-        return LambertCoordinates.fromLambert(getLambertX() + dx, getLambertY() + dy);
-    }
-
-    public void translateTo(float dx, float dy, PointF res) {
-        res.set(getLambertX() + dx, getLambertY() + dy);
-    }
-
-    public void fillInto(final @NonNull PointF p) {
-        p.set(getLambertX(), getLambertY());
-    }
-
+    /*
     public double getLatitude() {
         return toDegrees(getLatitudeRad());
     }
@@ -92,26 +58,21 @@ public class LambertCoordinates {
     }
 
     public double getLatitudeRad() {
-        if (lonLat == null) {
-            lonLat = latLonFromLambert(lambertX, lambertY);
-        }
-        return lonLat[1];
+        return lonLat.x;
     }
 
     public double getLongitudeRad() {
-        if (lonLat == null) {
-            lonLat = latLonFromLambert(lambertX, lambertY);
-        }
-        return lonLat[0];
+        return lonLat.y;
     }
 
     public float getLambertX() {
-        return lambertX;
+        return c.x;
     }
 
     public float getLambertY() {
-        return lambertY;
+        return c.y;
     }
+    */
 
     private static double latIsoFromLat(double lat) {
         return log(tan(PI / 4 + lat / 2) * pow((1 - LambertCoordinates.LAMBERT_E * sin(lat)) / (1 + LambertCoordinates.LAMBERT_E * sin(lat)), LambertCoordinates.LAMBERT_E / 2));
@@ -129,24 +90,27 @@ public class LambertCoordinates {
         return lat;
     }
 
-    private static float[] lambertFromLatLon(double lambda, double phi) {
+    private static PointF lambertFromLatLon(double phi, double lambda) {
+        // (phi: latitude, lambda: longitude)
+
         double L = latIsoFromLat(phi);
         float x =
                 (float) (LambertCoordinates.LAMBERT_XS + LambertCoordinates.LAMBERT_C * exp(-LambertCoordinates.LAMBERT_N * L) * sin(LambertCoordinates.LAMBERT_N * (lambda - LambertCoordinates.LAMBERT_LAMBDA_C)));
         float y =
                 (float) (LambertCoordinates.LAMBERT_YS - LambertCoordinates.LAMBERT_C * exp(-LambertCoordinates.LAMBERT_N * L) * cos(LambertCoordinates.LAMBERT_N * (lambda - LambertCoordinates.LAMBERT_LAMBDA_C)));
-        return new float[]{x, y};
+        return new PointF(x, y);
     }
 
-    private static double[] latLonFromLambert(double x, double y) {
+    private static PointF latLonFromLambert(final @NonNull PointF c) {
         double R =
-                sqrt((x - LambertCoordinates.LAMBERT_XS) * (x - LambertCoordinates.LAMBERT_XS) + (y - LambertCoordinates.LAMBERT_YS) * (y - LambertCoordinates.LAMBERT_YS));
+                sqrt((c.x - LambertCoordinates.LAMBERT_XS) * (c.x - LambertCoordinates.LAMBERT_XS) + (c.y - LambertCoordinates.LAMBERT_YS) * (c.y - LambertCoordinates.LAMBERT_YS));
         double gamma =
-                atan((x - LambertCoordinates.LAMBERT_XS) / (LambertCoordinates.LAMBERT_YS - y));
+                atan((c.x - LambertCoordinates.LAMBERT_XS) / (LambertCoordinates.LAMBERT_YS - c.y));
         double lambda = LambertCoordinates.LAMBERT_LAMBDA_C + gamma / LambertCoordinates.LAMBERT_N;
         double L = (-1 / LambertCoordinates.LAMBERT_N) * log(abs(R / LambertCoordinates.LAMBERT_C));
         double phi = latFromLatIso(L);
 
-        return new double[]{lambda, phi};
+        // (latitude, longitude)
+        return new PointF((float) phi, (float) lambda);
     }
 }

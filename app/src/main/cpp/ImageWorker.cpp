@@ -24,8 +24,8 @@ void ImageWorker::operator()(int id) {
         return;
     }
 
-    double top = tiePoint[0].coordX - tiePoint[0].imgX * scale.x;
-    double left = tiePoint[0].coordY + tiePoint[0].imgY * scale.y;
+    double left = tiePoint[0].coordX - tiePoint[0].imgX * scale.x;
+    double top = tiePoint[0].coordY + tiePoint[0].imgY * scale.y;
 
     std::ostringstream os;
     os << extractor.getFileDir() << "/"

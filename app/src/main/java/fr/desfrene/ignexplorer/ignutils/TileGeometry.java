@@ -18,11 +18,11 @@ public final class TileGeometry {
         this.lamOrig = new PointF(lambertXOrigin, lambertYOrigin);
     }
 
-    private int getTileWidth() {
+    public int getTileWidth() {
         return tileDim.x;
     }
 
-    private int getTileHeight() {
+    public int getTileHeight() {
         return tileDim.y;
     }
 
@@ -34,7 +34,7 @@ public final class TileGeometry {
         return getTileHeight() * scale.y;
     }
 
-    public void normalizeCoord(final PointF lambertC, final PointF result) {
+    public void normalizeCoord(final PointF lambertC, @NonNull final PointF result) {
         if (lambertC != null) {
             float dX = lambertC.x - lamOrig.x;
             float dY = lambertC.y - lamOrig.y;
@@ -46,20 +46,29 @@ public final class TileGeometry {
                     lamOrig.y + nY * getTileLambertHeight());
         }
     }
-
+    
     final static PointF tmpPointF = new PointF();
 
-    public void normalizeCoord(final LambertCoordinates topLeftCoordinates, final PointF res) {
-        topLeftCoordinates.fillInto(tmpPointF);
-        normalizeCoord(tmpPointF, res);
-    }
-
     public boolean isCompatibleWith(@NonNull TileGeometry geo) {
-        if (!scale.equals(geo.scale) && tileDim.equals(geo.tileDim)) {
+        if (!scale.equals(geo.scale)) {
+            return false;
+        }
+
+        if (!tileDim.equals(geo.tileDim)) {
             return false;
         }
 
         geo.normalizeCoord(lamOrig, tmpPointF);
         return tmpPointF.equals(lamOrig);
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "TileGeometry{" +
+                "scale=" + scale +
+                ", tileDim=" + tileDim +
+                ", lamOrig=" + lamOrig +
+                '}';
     }
 }

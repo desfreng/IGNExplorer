@@ -33,4 +33,6 @@ public interface ProgressStatus {
     void extractionError(Exception e);
 
     void savingError(Exception e);
+
+    void incompatibleTileSet();
 }
